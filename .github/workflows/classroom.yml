@@ -20,16 +20,23 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
+      # TODO build and run unit tests
+
       - name: Build images
         timeout-minutes: 10
+        working-directory: ./src # 👈 Tells GitHub to look inside the src folder
         run: docker compose build
 
       - name: Run containers
         timeout-minutes: 5
+        working-directory: ./src # 👈 Tells GitHub to look inside the src folder
         run: |
           docker compose up -d
-          # This gives your services (and Kafka/DB healthchecks) time to wake up
-          sleep 15 
+          # If your wait-script is in the root, use ../scripts/wait-script.sh
+          # If it's inside src, leave it as ./scripts/wait-script.sh
+          ./scripts/wait-script.sh 
+        env:
+          WAIT_PORTS: 8080,8070,8060,8050
 
       - name: Run API Tests
         uses: matt-ball/newman-action@master
@@ -43,8 +50,8 @@ jobs:
         id: autograder
         continue-on-error: true
 
-      # Stops and cleans up everything after tests finish
       - name: Stop containers
         if: always()
         continue-on-error: true
+        working-directory: ./src # 👈 Tells GitHub to look inside the src folder here too
         run: docker compose down -v
