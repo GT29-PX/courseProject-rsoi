@@ -32,16 +32,28 @@ jobs:
         working-directory: ./src
         run: |
           docker compose up -d
-          chmod -R +x ./backend/scripts/
           
-          # Run wait script, but catch failure to print debug logs
-          if ! ./backend/scripts/wait-script.sh; then
-            echo "❌ Startup timed out! Printing container logs for debugging:"
-            docker compose logs
-            exit 1
-          fi
-        env:
-          WAIT_PORTS: 8080,8070,8060,8050
+          echo "Waiting for services to become healthy..."
+          PORTS=(8080 8070 8060 8050)
+          
+          for PORT in "${PORTS[@]}"; do
+            echo "Checking port $PORT..."
+            TIMEOUT=30
+            while [ $TIMEOUT -gt 0 ]; do
+              if nc -z localhost $PORT; then
+                echo "✅ Port $PORT is active!"
+                break
+              fi
+              sleep 1
+              TIMEOUT=$((TIMEOUT - 1))
+            done
+            
+            if [ $TIMEOUT -eq 0 ]; then
+              echo "❌ Port $PORT timed out! Printing diagnostics..."
+              docker compose logs
+              exit 1
+            fi
+          done
 
       - name: Run API Tests
         uses: matt-ball/newman-action@master
