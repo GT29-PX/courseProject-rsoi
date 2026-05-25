@@ -32,8 +32,11 @@ jobs:
         working-directory: ./src
         run: |
           docker compose up -d
-          # Path updated to look inside backend/scripts/
-          chmod +x ./backend/scripts/wait-script.sh
+          
+          # Force execution permissions on the entire scripts directory
+          chmod -R +x ./backend/scripts/
+          
+          # Run the script
           ./backend/scripts/wait-script.sh
         env:
           WAIT_PORTS: 8080,8070,8060,8050
