@@ -2,20 +2,21 @@ name: GitHub Classroom Workflow
 on:
   push:
     branches:
-      - master
+      - main # Changed from master to match your repository
   pull_request:
     branches:
-      - master
+      - main # Changed from master
+
 jobs:
   build:
     name: Autograding
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4 # Updated to v4
         with:
           fetch-depth: 0
 
-      - uses: docker/setup-buildx-action@v2
+      - uses: docker/setup-buildx-action@v3 # Updated to v3
 
       # TODO build and run unit tests
 
@@ -34,7 +35,6 @@ jobs:
       - name: Run API Tests
         uses: matt-ball/newman-action@master
         with:
-          # TODO insert your variant
           collection: v2/postman/collection.json
           environment: v2/postman/environment.json
           delayRequest: 100
@@ -44,15 +44,19 @@ jobs:
         id: autograder
         continue-on-error: true
 
-      # - name: Github auto grader mark
-      #   uses: Romanow/google-sheet-autograder-marker@v1.0
+      # =========================================================================
+      # OPTIONAL: If you still need to deploy to your VM after testing passes, 
+      # uncomment this block and add your GitHub Secrets (REMOTE_HOST, etc.)
+      # =========================================================================
+      # - name: Copy source files to Remote VM
+      #   uses: appleboy/scp-action@v0.1.4
       #   with:
-      #     google_token: ${{secrets.GOOGLE_API_KEY}}
-      #     sheet_id: "1xkgjUX6Qmk7rdJG-QPOToav-HWWtthJjnShIKnw3oIY"
-      #     homework_number: 2
-      #     user_column: 'D'
-      #     column_offset: 'F'
-      #     mark: "'+"
+      #     host: ${{ secrets.REMOTE_HOST }}
+      #     username: ${{ secrets.REMOTE_USER }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     source: "src"
+      #     target: "/home/ubuntu/librareally"
+      # =========================================================================
 
       - name: Stop containers
         if: always()
