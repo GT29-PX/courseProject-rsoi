@@ -73,7 +73,7 @@ jobs:
 
       - uses: education/autograding@v1
         id: autograder
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Stop containers
         if: always()
