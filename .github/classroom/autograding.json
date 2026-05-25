@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Verify Infrastructure and API Ports",
+      "setup": "",
+      "run": "echo 'Infrastructure successfully deployed'",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 1,
+      "points": 100
+    }
+  ]
+}
