@@ -2,23 +2,23 @@ name: GitHub Classroom Workflow
 on:
   push:
     branches:
-      - main # Changed from master to match your repository
+      - main
+      - dev
   pull_request:
     branches:
-      - main # Changed from master
+      - main
+      - dev
 
 jobs:
   build:
     name: Autograding
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # Updated to v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: docker/setup-buildx-action@v3 # Updated to v3
-
-      # TODO build and run unit tests
+      - uses: docker/setup-buildx-action@v3
 
       - name: Build images
         timeout-minutes: 10
@@ -28,9 +28,8 @@ jobs:
         timeout-minutes: 5
         run: |
           docker compose up -d
-          ./scripts/wait-script.sh
-        env:
-          WAIT_PORTS: 8080,8070,8060,8050
+          # This gives your services (and Kafka/DB healthchecks) time to wake up
+          sleep 15 
 
       - name: Run API Tests
         uses: matt-ball/newman-action@master
@@ -44,20 +43,7 @@ jobs:
         id: autograder
         continue-on-error: true
 
-      # =========================================================================
-      # OPTIONAL: If you still need to deploy to your VM after testing passes, 
-      # uncomment this block and add your GitHub Secrets (REMOTE_HOST, etc.)
-      # =========================================================================
-      # - name: Copy source files to Remote VM
-      #   uses: appleboy/scp-action@v0.1.4
-      #   with:
-      #     host: ${{ secrets.REMOTE_HOST }}
-      #     username: ${{ secrets.REMOTE_USER }}
-      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     source: "src"
-      #     target: "/home/ubuntu/librareally"
-      # =========================================================================
-
+      # Stops and cleans up everything after tests finish
       - name: Stop containers
         if: always()
         continue-on-error: true
