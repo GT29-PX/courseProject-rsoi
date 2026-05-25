@@ -32,12 +32,14 @@ jobs:
         working-directory: ./src
         run: |
           docker compose up -d
-          
-          # Force execution permissions on the entire scripts directory
           chmod -R +x ./backend/scripts/
           
-          # Run the script
-          ./backend/scripts/wait-script.sh
+          # Run wait script, but catch failure to print debug logs
+          if ! ./backend/scripts/wait-script.sh; then
+            echo "❌ Startup timed out! Printing container logs for debugging:"
+            docker compose logs
+            exit 1
+          fi
         env:
           WAIT_PORTS: 8080,8070,8060,8050
 
