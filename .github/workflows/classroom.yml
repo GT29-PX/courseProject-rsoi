@@ -24,17 +24,17 @@ jobs:
 
       - name: Build images
         timeout-minutes: 10
-        working-directory: ./src # 👈 Tells GitHub to look inside the src folder
+        working-directory: ./src
         run: docker compose build
 
       - name: Run containers
         timeout-minutes: 5
-        working-directory: ./src # 👈 Tells GitHub to look inside the src folder
+        working-directory: ./src
         run: |
           docker compose up -d
-          # If your wait-script is in the root, use ../scripts/wait-script.sh
-          # If it's inside src, leave it as ./scripts/wait-script.sh
-          ./scripts/wait-script.sh 
+          # Path updated to look inside backend/scripts/
+          chmod +x ./backend/scripts/wait-script.sh
+          ./backend/scripts/wait-script.sh
         env:
           WAIT_PORTS: 8080,8070,8060,8050
 
@@ -53,5 +53,5 @@ jobs:
       - name: Stop containers
         if: always()
         continue-on-error: true
-        working-directory: ./src # 👈 Tells GitHub to look inside the src folder here too
+        working-directory: ./src
         run: docker compose down -v
